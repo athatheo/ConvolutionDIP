@@ -75,10 +75,10 @@ def myImNoise(A_local, noise):
     return A_local
 
 
-def myImFilter(A_local, filter):
+def myImFilter(A_local, filter, size):
     if filter == 'median':
-        kernelX = 3
-        kernelY = 3
+        kernelX = size
+        kernelY = size
         window = np.zeros((kernelX*kernelY), dtype=int)
         newA = np.zeros((A_local.shape[0],A_local.shape[1]), dtype=int)
         midWindowX = int(kernelX / 2)
@@ -95,7 +95,7 @@ def myImFilter(A_local, filter):
                 newA[x][y] = value
         return np.uint8(newA)
     elif filter == 'mean':
-        b = np.ones((6, 6), np.float32) / 25
+        b = np.ones((size, size), np.float32) / (size*size)
         convoluted = myConv2(A_local, b, 'same')
         height = convoluted.shape[0]
         width = convoluted.shape[1]
@@ -105,21 +105,36 @@ def myImFilter(A_local, filter):
                     convoluted[i][j] = 255
         return np.uint8(convoluted)
 
-A = cv2.imread('test.png', 0)  # read image - black and white
-cv2.imshow('image', A)  # show image
-cv2.waitKey(0)  # wait for key press
-cv2.destroyAllWindows()  # close image window
-#B = myImNoise(A, 'gaussian')
-# or
-B = myImNoise(A, 'saltandpepper')
-cv2.imshow('image', B) #show image
-cv2.waitKey(0) #wait for key press
-cv2.destroyAllWindows() #close image window
 
-#C = myImFilter(B, 'mean')
-# or
-C = myImFilter(B, 'median')
-cv2.imshow('image', C) #show image
-cv2.waitKey(0) #wait for key press
-cv2.destroyAllWindows() #close image window
+contin = 1
+while contin == 1:
+    A = cv2.imread('test.png', 0)  # read image - black and white
+    cv2.imshow('image', A)  # show image
+    cv2.waitKey(0)  # wait for key press
+    cv2.destroyAllWindows()  # close image window
+    val = 0
+    while val != 1 and val != 2:
+        val = int(input("Press 1 if you want to choose Gaussian noise or 2 if you want to choose saltandpepper noise\n"))
+    size = 0
 
+    if val == 1:
+        B = myImNoise(A, 'gaussian')
+    else:
+        B = myImNoise(A, 'saltandpepper')
+    cv2.imshow('image', B)  # show image
+    cv2.waitKey(0)  # wait for key press
+    cv2.destroyAllWindows()  # close image window
+    while size < 2:
+        size = int(input("Please enter filter size larger than 1. You should enter one number, since it's going to be square\n"))
+
+    val = 0
+    while val != 1 and val != 2:
+        val = int(input("Press 1 if you want to choose Mean Filter or 2 if you want to choose Median Filter\n"))
+    if val == 1:
+        C = myImFilter(B, 'mean', size)
+    else:
+        C = myImFilter(B, 'median', size)
+    cv2.imshow('image', C)  # show image
+    cv2.waitKey(0)  # wait for key press
+    cv2.destroyAllWindows()  # close image window
+    contin = int(input("If you want to continue press 1\n"))
